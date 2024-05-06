@@ -3,14 +3,30 @@ import React, { useState } from 'react'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors'
 import { TouchableOpacity } from 'react-native'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
+import { useSignUp } from '@clerk/clerk-expo'
 
-const Signup = () => {
+const SignUp = () => {
 
-    const onSignup = async () => { }
-    const [countryCode, setCountryCode] = useState("+49")
-    const [phoneNumber, setphoneNumber] = useState("123 456 7890")
+    const [countryCode, setCountryCode] = useState("+39")
+    const [phoneNumber, setPhoneNumber] = useState("")
     const keyboardverticalOffset = Platform.OS === "ios" ? 90 : 0
+    const router = useRouter();
+    const { signUp } = useSignUp();
+
+    const onSignUp = async () => {
+        const fullPhoneNumber = `${countryCode}${phoneNumber}`
+
+        try {
+            await signUp!.create({
+                phoneNumber: fullPhoneNumber
+            })
+            signUp!.preparePhoneNumberVerification();
+            router.push({ pathname: "/verify/[phone]", params: { phone: fullPhoneNumber } })
+        } catch (error) {
+            console.log("Error signing up: ", error)
+        }
+    }
 
     return (
         <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={keyboardverticalOffset}>
@@ -20,8 +36,8 @@ const Signup = () => {
                     Enter your phone number. We will send you a confirmation code there
                 </Text>
                 <View style={styles.inputContainer}>
-                    <TextInput style={[styles.input, { flex: 0.2 }]} placeholder="Country code" keyboardType="numeric" placeholderTextColor={Colors.gray} value={countryCode} />
-                    <TextInput style={[styles.input, { flex: 1 }]} placeholder="Mobile number" keyboardType="numeric" placeholderTextColor={Colors.gray} value={phoneNumber} onChangeText={setphoneNumber} />
+                    <TextInput style={[styles.input, { flex: 0.2 }]} placeholder="Country code" keyboardType="numeric" placeholderTextColor={Colors.gray} value={countryCode} onChangeText={setCountryCode} />
+                    <TextInput style={[styles.input, { flex: 1 }]} placeholder="Mobile number" keyboardType="numeric" placeholderTextColor={Colors.gray} value={phoneNumber} onChangeText={setPhoneNumber} />
                 </View>
                 <Link href={"/login"} asChild>
                     <TouchableOpacity>
@@ -31,7 +47,7 @@ const Signup = () => {
 
                 <View style={{ flex: 1 }} />
 
-                <TouchableOpacity style={[defaultStyles.pillButton, phoneNumber === "" ? styles.disabled : styles.enabled, { marginTop: 20 }]} onPress={onSignup}>
+                <TouchableOpacity style={[defaultStyles.pillButton, phoneNumber === "" ? styles.disabled : styles.enabled, { marginTop: 20 }]} onPress={onSignUp}>
                     <Text style={defaultStyles.buttonText}>Sign up</Text>
                 </TouchableOpacity>
             </View>
@@ -61,4 +77,4 @@ const styles = StyleSheet.create({
 })
 
 
-export default Signup
+export default SignUp
