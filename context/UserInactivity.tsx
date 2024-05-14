@@ -22,7 +22,25 @@ export const UserInactivityProvider = ({ children }: any) => {
   }, []);
 
   const handleAppStateChange = async (nextAppState: AppStateStatus) => {
-    console.log(nextAppState);
+    if (nextAppState === "background") {
+      recordStarttime();
+    } else if (
+      nextAppState == "active" &&
+      appState.current.match(/background/)
+    ) {
+      const elapsed = Date.now() - (storage.getNumber("startTime") || 0);
+
+      if (elapsed > 3000 && isSignedIn) {
+        router.replace("/(authenticated)/(modals)/lock");
+      }
+    }
+
+    appState.current = nextAppState;
+  };
+
+  const recordStarttime = () => {
+    const now = new Date();
+    storage.set("startTime", Date.now());
   };
 
   return children;
