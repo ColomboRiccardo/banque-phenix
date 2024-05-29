@@ -29,8 +29,12 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      ["expo-router", { "origin": "https://galazies.dev" }],
-      "expo-secure-store",
+      [
+        "expo-router",
+        {
+          "origin": "https://galazies.dev"
+        }
+      ],
       "expo-secure-store",
       [
         "expo-local-authentication",
